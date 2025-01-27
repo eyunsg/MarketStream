@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MarketStream</title>
+    <link rel="stylesheet" href="/main.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MarketStream</h1>
+      <div class="button-container">
+        <button id="BTC" class="custom-button">BTC</button>
+        <button id="AAPL" class="custom-button">AAPL</button>
+      </div>
+    </div>
+
+    <script>
+      $("#BTC").click(function () {
+        window.location.href = `/detail/BTC-USD`;
+      });
+      $("#AAPL").click(function () {
+        window.location.href = `/detail/AAPL`;
+      });
+    </script>
+  </body>
+</html>

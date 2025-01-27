@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarketStream - <%= symbol %></title>
+  <link rel="stylesheet" href="/main.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+    type="text/javascript"
+    src="https://s3.tradingview.com/tv.js"
+  ></script>
+</head>
+<body>
+  <body class="detail-page">
+    <h1>
+      <span class="stock-title"><%= symbol %></span><br />
+      <span class="stock-subtitle">(Yahoo Finance)</span><br /><br />
+      <div class="state-container">
+        <span class="stock-subtitle" id="state"></span>
+        <span id="state-indicator"></span>
+      </div>
+    </h1>
+
+    <div class="stock-box">
+      <div class="stock-info low-price">
+        <h3>하한가</h3>
+        <p id="low-price">₩0</p>
+      </div>
+
+      <div class="stock-info current-price">
+        <h3>현재가</h3>
+        <p id="current-price">₩0</p>
+      </div>
+
+      <div class="stock-info high-price">
+        <h3>상한가</h3>
+        <p id="high-price">₩0</p>
+      </div>
+    </div>
+
+    <div class="tradingview-widget-container">
+      <div id="tradingview_chart"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+    <script>
+      const symbol = "<%= symbol %>";
+      const socket = io("/", { query: { symbol } });
+
+      socket.on("data", (currentPrice, highPrice, lowPrice, marketState) => {
+        $("#current-price").html(`₩${currentPrice}`);
+        $("#high-price").html(`₩${highPrice}`);
+        $("#low-price").html(`₩${lowPrice}`);
+
+        if (marketState == "REGULAR") {
+          marketState = "OPEN";
+          $("#state-indicator").removeClass("red").addClass("green");
+        } else {
+          marketState = "CLOSE";
+          $("#state-indicator").removeClass("green").addClass("red");
+        }
+        $("#state").html(`Market State - ${marketState}`);
+
+        console.log(`current - ${currentPrice}`);
+        console.log(`high - ${highPrice}`);
+        console.log(`low - ${lowPrice}`);
+        console.log(`state - ${marketState}`);
+        console.log("------------------------------");
+      });
+
+      let tradingviewSymbol;
+      if (symbol == "BTC-USD") {
+        tradingviewSymbol = "BINANCE:BTCUSD";
+      } else {
+        tradingviewSymbol = "NASDAQ:AAPL";
+      }
+
+      new TradingView.widget({
+        symbol: tradingviewSymbol,
+        interval: "1",
+        theme: "dark",
+        timezone: "Asia/Seoul",
+        hide_top_toolbar: true,
+        autosize: true,
+      });
+    </script>
+  </body>
+</body>

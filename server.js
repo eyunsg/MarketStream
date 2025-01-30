@@ -78,11 +78,23 @@ const formatCurrency = (amount) => {
 };
 
 // 환율 데이터 가져오는 함수
+let cachedRate = null;
+let lastFetchedTime = 0;
+
 async function usdToKrw() {
-  const exchangeRateResponse = await fetch(
-    "https://api.exchangerate-api.com/v4/latest/USD"
-  );
-  const exchangeRateData = await exchangeRateResponse.json();
-  const usdToKrw = exchangeRateData.rates.KRW;
-  return usdToKrw;
+  const now = Date.now();
+  // 10분마다 갱신
+  if (!cachedRate || now - lastFetchedTime > 10 * 60 * 1000) {
+    try {
+      const exchangeRateResponse = await fetch(
+        "https://api.exchangerate-api.com/v4/latest/USD"
+      );
+      const exchangeRateData = await exchangeRateResponse.json();
+      cachedRate = exchangeRateData.rates.KRW;
+      lastFetchedTime = now;
+    } catch (error) {
+      console.error("환율 API 호출 실패:", error);
+    }
+  }
+  return cachedRate;
 }

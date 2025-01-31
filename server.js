@@ -62,7 +62,7 @@ io.on("connection", async (socket) => {
 
   const fetchStockDataLoop = async () => {
     await fetchStockData();
-    setTimeout(fetchStockDataLoop, 65000);
+    setTimeout(fetchStockDataLoop, 5000);
   };
 
   fetchStockDataLoop();

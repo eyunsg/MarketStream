@@ -33,14 +33,14 @@ server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-io.on("connection", async (socket) => {
-  console.log("소컷연결");
+const activeIntervals = new Map();
 
-  const symbol = socket.handshake.query.symbol; // 클라이언트에서 전달된 symbol
+io.on("connection", async (socket) => {
+  console.log("소켓 연결됨:", socket.id);
+  const symbol = socket.handshake.query.symbol;
 
   const fetchStockData = async () => {
     try {
-      // 파이낸스 정보 가져오기
       const stockData = await yahooFinance.quote(symbol);
       const marketState = stockData.marketState;
       const rate = await usdToKrw();
@@ -62,16 +62,28 @@ io.on("connection", async (socket) => {
 
   const fetchStockDataLoop = async () => {
     await fetchStockData();
-    setTimeout(fetchStockDataLoop, 5000);
+    if (activeIntervals.has(socket.id)) {
+      const timeout = setTimeout(fetchStockDataLoop, 5000);
+      activeIntervals.set(socket.id, timeout);
+    }
   };
 
-  fetchStockDataLoop();
+  await fetchStockData();
+  activeIntervals.set(socket.id, setTimeout(fetchStockDataLoop, 5000));
 
-  // 소켓 연결 해제 시 interval 정리
+  // 소켓 연결 해제 시 타임아웃 정리
   socket.on("disconnect", () => {
-    console.log("소켓 연결 종료");
-    clearInterval(interval);
+    console.log("소켓 연결 종료:", socket.id);
+    clearTimeout(activeIntervals.get(socket.id));
+    activeIntervals.delete(socket.id);
   });
+});
+
+// 서버 종료 시 모든 setTimeout 정리
+process.on("SIGINT", () => {
+  console.log("서버 종료 중, 모든 타임아웃 정리...");
+  activeIntervals.forEach(clearTimeout);
+  process.exit();
 });
 
 // 콤마 추가, 소숫점 제거 함수

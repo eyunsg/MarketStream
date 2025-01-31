@@ -60,8 +60,12 @@ io.on("connection", async (socket) => {
     }
   };
 
-  fetchStockData();
-  const interval = setInterval(fetchStockData, 65000);
+  const fetchStockDataLoop = async () => {
+    await fetchStockData();
+    setTimeout(fetchStockDataLoop, 65000);
+  };
+
+  fetchStockDataLoop();
 
   // 소켓 연결 해제 시 interval 정리
   socket.on("disconnect", () => {

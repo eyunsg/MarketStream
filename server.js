@@ -14,11 +14,11 @@ const io = new Server(server);
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 
-app.get("/", async (req, res) => {
+app.get("/", (req, res) => {
   res.render("main.ejs");
 });
 
-app.get("/detail/:symbol", async (req, res) => {
+app.get("/detail/:symbol", (req, res) => {
   try {
     let symbol = req.params.symbol;
 
